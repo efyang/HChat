@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+cd $DIR
+mkdir -p ./dist/
+distver="$(uname -s)$(uname -m)"
+rm -rf ./dist/$distver
+mkdir -p ./dist/$distver
+ghc --make ./src/client.hs -O2 -H500m -o ./dist/$distver/client
+ghc --make ./src/server.hs -O2 -H500m -o ./dist/$distver/server
+chmod a+rx ./dist/$distver/server ./dist/$distver/client
