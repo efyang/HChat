@@ -7,4 +7,5 @@ rm -rf ./dist/$distver
 mkdir -p ./dist/$distver
 ghc --make ./src/client.hs -O2 -H500m -o ./dist/$distver/client
 ghc --make ./src/server.hs -O2 -H500m -o ./dist/$distver/server
+cp ./src/curl ./dist/$distver/curl
 chmod a+rx ./dist/$distver/server ./dist/$distver/client

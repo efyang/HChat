@@ -13,5 +13,6 @@ GOTO END
 :END
 md dist
 rd /s /q dist/%DISTVER%
+copy %~dp0src/curl.exe ./dist/%DISTVER%/curl.exe
 ghc --make %~dp0src/client.hs -O2 -H500m -o ./dist/%DISTVER%/client
 ghc --make %~dp0src/server.hs -O2 -H500m -o ./dist/%DISTVER%/server
