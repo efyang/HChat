@@ -3,6 +3,7 @@ import Network
 import System.Environment
 import System.IO
 import System.Exit
+import Data.List(isPrefixOf)
 
 mkconn :: IO Handle
 mkconn = do 
@@ -10,7 +11,7 @@ mkconn = do
     args <- getArgs
     if length args /= 2 then putStrLn "\nError: Invalid/Incomplete Arguments"
                       >> exitFailure
-    else putStrLn "Running"
+    else putStrLn "Client is starting up.\n"
     let [host,port] = args
     serveConn <- connectTo host $ PortNumber $ toEnum $ read port
     --set buffering for speed
@@ -41,6 +42,9 @@ echoStr conn str = hPutStrLn conn ("echo " ++ str)
 checkBuffer :: Handle -> IO()
 checkBuffer conn = do
     buffer <- hGetContents conn 
-    putStrLn ("Message from server: " ++ buffer)
+    msgProcessor buffer conn
     checkBuffer conn
 
+msgProcessor :: String -> Handle -> IO()
+msgProcessor msgStr conn | "msg" `isPrefixOf` msgStr = putStrLn ("Message from server: " ++ msgStr)
+                         | otherwise = return ()
