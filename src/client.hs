@@ -4,40 +4,43 @@ import System.Environment
 import System.IO
 import System.Exit
 
-main :: IO ()
-main = do
-	--connect to the hostand port
+mkconn :: IO Handle
+mkconn = do 
+    --connect to the hostand port
     args <- getArgs
-    if null args then putStrLn "Invalid/Incomplete Arguments"
-    				  >> exitFailure
+    if length args /= 2 then putStrLn "\nError: Invalid/Incomplete Arguments"
+                      >> exitFailure
     else putStrLn "Running"
     let [host,port] = args
     serveConn <- connectTo host $ PortNumber $ toEnum $ read port
     --set buffering for speed
     hSetBuffering stdout LineBuffering
     hSetBuffering serveConn LineBuffering
+    return serveConn
+
+main :: IO ()
+main = do
+    serveConn <- mkconn
     --put a message in the connection data queue
-    _ <- sendEcho serveConn "Hello World"
+    _ <- forkIO $ sendEcho serveConn
     --receive anything that comes back
-    _ <- forkIO $ hGetContents serveConn >>= putStr
-    getContents >>= hPutStr serveConn
+    checkBuffer serveConn 
+    putStrLn "All Jobs Started"
+    
 
-sendEcho :: Handle -> String -> IO ThreadId
-sendEcho conn msgStr = forkIO $ do 
-	hPutStrLn conn ("echo " ++ msgStr)
-	self <- myThreadId
-	--kills self for RAII
-	killThread self
+sendEcho :: Handle -> IO()
+sendEcho conn = do
+    putStrLn "Input Message: "
+    userinput <- getLine
+    echoStr conn userinput 
+    sendEcho conn
 
---looped derivative
-ddosEcho :: Handle -> String -> IO ThreadId
-ddosEcho conn msgStr = forkIO $ do 
-	hPutStrLn conn ("echo " ++ msgStr)
-	self <- myThreadId
-	_ <- ddosEcho conn msgStr
-	--kills self for RAII
-	killThread self
+echoStr :: Handle -> String -> IO ()
+echoStr conn str = hPutStrLn conn ("echo " ++ str)
 
-checkBuffer :: Handle -> IO ThreadId
-checkBuffer conn = forkIO $ hGetContents conn >>= putStr
+checkBuffer :: Handle -> IO()
+checkBuffer conn = do
+    buffer <- hGetContents conn 
+    putStrLn ("Message from server: " ++ buffer)
+    checkBuffer conn
 

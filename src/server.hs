@@ -26,8 +26,9 @@ defaultport ports | null ports = ["5000"]
 
 sockHandler :: Socket -> IO ()
 sockHandler sock = do
-    (handle, _, _) <- accept sock
+    (handle, host, port) <- accept sock
     hSetBuffering handle NoBuffering
+    putStrLn ("User at Host: " ++ show host ++ " Port: " ++ show port ++ " connected.")
     _ <- forkIO $ commandProcessor handle
     sockHandler sock
 
