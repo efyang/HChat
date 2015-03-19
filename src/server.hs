@@ -6,13 +6,14 @@ import System.Process(readProcess)
 
 getip :: IO String
 getip = do
-    rawip <- readProcess "curl" ["http://icanhazip.com"] [] 
+    rawip <- readProcess "curl" ["http://ifconfig.me/ip"] [] 
     let ipaddr = fst (splitAt (length rawip - 1) rawip)
     return ipaddr
 
 main :: IO ()
 main = withSocketsDo $ do
     args <- getArgs
+    putStrLn "Getting Server IP address..."
     myip <- getip
     let checkedArgs = defaultport args
     let port = fromIntegral (read $ head checkedArgs :: Int)
